@@ -1,0 +1,6 @@
+{
+  "name": "AURORA",
+  "description": "An enterprise-grade, high-end web experience for AURORA - Hospitality Technology & Business Growth Ecosystem, featuring interactive scrolling-synced video backdrops, custom demo requests, and persistent dark/light mode.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

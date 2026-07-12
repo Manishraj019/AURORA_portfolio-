@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <defs>
+    <!-- Left leg gradient: Deep Purple to Vibrant Purple -->
+    <linearGradient id="leftGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="30%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#C084FC" />
+    </linearGradient>
+
+    <!-- Top element gradient: Rich Purple to Electric Blue -->
+    <linearGradient id="topGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#9333EA" />
+      <stop offset="50%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+
+    <!-- Right element gradient: Deep Royal Blue to Bright Sky Blue/Cyan -->
+    <linearGradient id="rightGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#1E40AF" />
+      <stop offset="40%" stop-color="#3B82F6" />
+      <stop offset="75%" stop-color="#0EA5E9" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+  </defs>
+
+  <!-- Left Leg (Slightly adjusted for organic perfect overlay) -->
+  <path d="M 193 760 L 315 760 L 481 477 L 359 477 Z" fill="url(#leftGrad)" />
+
+  <!-- Top Element -->
+  <path d="M 385 240 L 505 240 L 625 454 L 505 454 Z" fill="url(#topGrad)" />
+
+  <!-- Right/Horizontal Hook Element -->
+  <path d="M 485 592 L 713 592 L 807 760 L 667 760 L 615 667 L 441 667 Z" fill="url(#rightGrad)" />
+</svg>
