@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate FormSubmit</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #08090d; color: white; flex-direction: column; }
+        button { padding: 15px 30px; font-size: 18px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>FormSubmit Manual Activation</h2>
+    <p>Click the button below to bypass the React AJAX block and manually trigger your activation email.</p>
+    <form action="https://formsubmit.co/aurora.web011@gmail.com" method="POST">
+        <input type="hidden" name="name" value="FormSubmit Activation">
+        <input type="hidden" name="_subject" value="Manual FormSubmit Activation Trigger">
+        <button type="submit">Trigger Activation Email</button>
+    </form>
+</body>
+</html>
