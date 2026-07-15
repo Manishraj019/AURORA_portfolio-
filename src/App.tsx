@@ -12,6 +12,7 @@ import ThemeToggle from './components/ThemeToggle';
 
 import DemoModal from './components/DemoModal';
 import AmbientAudio from './components/AmbientAudio';
+import BillingDashboard from './components/billing/BillingDashboard';
 import GooeyNav, { GooeyNavItem } from './components/GooeyNav';
 const CircularGallery = lazy(() => import('./components/CircularGallery'));
 import { BackdropPreset, BackgroundVideoOption } from './types';
@@ -474,6 +475,22 @@ export default function App() {
       setIsBackdropOpen(false);
     }
   };
+
+  // Hash routing for Billing Dashboard
+  const [currentHash, setCurrentHash] = useState(window.location.hash);
+  useEffect(() => {
+    const handleHashChange = () => setCurrentHash(window.location.hash);
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  if (currentHash === '#billing') {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center text-white font-mono">LOADING SYSTEM...</div>}>
+        <BillingDashboard />
+      </Suspense>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-transparent text-slate-900 dark:text-slate-100 selection:bg-violet-500/30 overflow-x-hidden transition-colors duration-500">
