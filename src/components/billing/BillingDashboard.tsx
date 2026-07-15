@@ -237,7 +237,7 @@ export default function BillingDashboard() {
                     ].map((stat, i) => (
                       <div key={i} className="p-6 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.02] backdrop-blur-xl shadow-sm hover:shadow-md transition-all">
                         <div className="flex items-center justify-between mb-4">
-                          <div className={\`w-10 h-10 rounded-xl \${stat.bg} \${stat.color} flex items-center justify-center\`}>
+                          <div className={`w-10 h-10 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center`}>
                             <stat.icon className="w-5 h-5" />
                           </div>
                           <TrendingUp className="w-4 h-4 text-slate-400" />
