@@ -230,8 +230,8 @@ export default function BillingDashboard() {
                   {/* Summary Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[
-                      { label: 'Total Revenue', value: \`₹\${totalRevenue.toLocaleString()}\`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-                      { label: 'Pending Payments', value: \`₹\${totalPending.toLocaleString()}\`, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                      { label: 'Total Revenue', value: `₹${totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                      { label: 'Pending Payments', value: `₹${totalPending.toLocaleString()}`, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/10' },
                       { label: 'Active Projects', value: activeProjects, icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-500/10' },
                       { label: 'Total Clients', value: clients.length, icon: Users, color: 'text-violet-500', bg: 'bg-violet-500/10' },
                     ].map((stat, i) => (
