@@ -4,10 +4,10 @@ import { useBillingStore } from '../../store/billingStore';
 import { 
   LayoutDashboard, Users, FileText, ArrowLeft, 
   Plus, DollarSign, Briefcase, Activity, TrendingUp, Clock,
-  Lock, KeyRound, Download, Printer
+  Lock, KeyRound, Download, Printer, X
 } from 'lucide-react';
 
-const ADMIN_PIN = '0000'; // Extremely simple for this demo, usually should be hashed or env var
+const ADMIN_PIN = 'Admin011'; // Extremely simple for this demo, usually should be hashed or env var
 
 export default function BillingDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -15,7 +15,9 @@ export default function BillingDashboard() {
   const [pinError, setPinError] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'clients' | 'invoices'>('dashboard');
-  const { clients, projects, invoices, getProjectRemaining, getProjectTotalPaid } = useBillingStore();
+  const { clients, projects, invoices, getProjectRemaining, getProjectTotalPaid, addClient } = useBillingStore();
+  const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
+  const [newClientForm, setNewClientForm] = useState({ name: '', companyName: '', contactPerson: '', email: '', phone: '', address: '' });
 
   const totalRevenue = projects.reduce((acc, p) => acc + getProjectTotalPaid(p), 0);
   const totalPending = projects.reduce((acc, p) => acc + getProjectRemaining(p), 0);
@@ -269,7 +271,10 @@ export default function BillingDashboard() {
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-sm mb-6">
                       Start building your CRM by adding your first client.
                     </p>
-                    <button className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all">
+                    <button 
+                      onClick={() => setIsAddClientModalOpen(true)}
+                      className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all"
+                    >
                       Add New Client
                     </button>
                 </div>
@@ -316,6 +321,83 @@ export default function BillingDashboard() {
 
         </div>
       </main>
+
+      {/* Add Client Modal */}
+      <AnimatePresence>
+        {isAddClientModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              className="bg-white dark:bg-[#0d0e12] border border-slate-200 dark:border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl relative"
+            >
+              <button 
+                onClick={() => setIsAddClientModalOpen(false)}
+                className="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="w-12 h-12 bg-violet-500/10 rounded-2xl flex items-center justify-center mb-6">
+                <Users className="w-6 h-6 text-violet-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-6 font-display text-slate-900 dark:text-white">Add New Client</h3>
+              
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                addClient({
+                  name: newClientForm.name,
+                  companyName: newClientForm.companyName,
+                  contactPerson: newClientForm.name,
+                  email: newClientForm.email,
+                  phone: newClientForm.phone,
+                  address: newClientForm.address
+                });
+                setIsAddClientModalOpen(false);
+                setNewClientForm({name: '', companyName: '', contactPerson: '', email: '', phone: '', address: ''});
+              }} className="space-y-4">
+                
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Client / Contact Name</label>
+                  <input required placeholder="e.g. John Doe" 
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-500 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all"
+                    value={newClientForm.name} onChange={e => setNewClientForm({...newClientForm, name: e.target.value})} />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Company Name</label>
+                  <input required placeholder="e.g. Acme Corp" 
+                    className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-500 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all"
+                    value={newClientForm.companyName} onChange={e => setNewClientForm({...newClientForm, companyName: e.target.value})} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Email</label>
+                    <input required type="email" placeholder="john@acme.com" 
+                      className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-500 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all"
+                      value={newClientForm.email} onChange={e => setNewClientForm({...newClientForm, email: e.target.value})} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Phone</label>
+                    <input required placeholder="+1 234 567 8900" 
+                      className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-500 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all"
+                      value={newClientForm.phone} onChange={e => setNewClientForm({...newClientForm, phone: e.target.value})} />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button type="submit" className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-medium transition-all shadow-[0_0_20px_rgba(124,58,237,0.3)]">
+                    Save Client
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
