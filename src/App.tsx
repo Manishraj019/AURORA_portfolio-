@@ -1153,6 +1153,10 @@ export default function App() {
               <span>RELIABILITY: 99.99%</span>
               <span>•</span>
               <span>CLOUDFLARE SECURED</span>
+              <span>•</span>
+              <a href="#billing" className="hover:text-violet-400 transition-colors" title="Admin Portal">
+                <Lock className="w-3.5 h-3.5 inline-block" />
+              </a>
             </div>
 
             <div className="font-sans text-xs text-slate-400 dark:text-slate-500">
