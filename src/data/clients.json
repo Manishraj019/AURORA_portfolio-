@@ -1,11 +1,1 @@
-[
-  {
-    "id": "example-client-3",
-    "name": "Prime Burger Co.",
-    "image": "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=800&q=80",
-    "website": "https://example.com/prime",
-    "review": "\"Their RestaurantOS saved us so much time on inventory and billing. The interface is stunning and the customers love it.\"",
-    "rating": 4.5,
-    "category": "Hospitality"
-  }
-]
+[]
