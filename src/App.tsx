@@ -1208,7 +1208,7 @@ export default function App() {
               <span>•</span>
               <span>CLOUDFLARE SECURED</span>
               <span>•</span>
-              <a href="#billing" className="hover:text-violet-400 transition-colors" title="Admin Portal">
+              <a href="/admin" className="hover:text-violet-400 transition-colors" title="Admin Portal">
                 <Lock className="w-3.5 h-3.5 inline-block" />
               </a>
             </div>
