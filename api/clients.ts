@@ -19,7 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { action = 'add', id, password, name, website, review, rating, category, imageBase64, imageName } = req.body;
 
     // 1. Verify Password
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin1923';
     if (!adminPassword) {
       return res.status(500).json({ error: 'Server misconfiguration: ADMIN_PASSWORD is not set.' });
     }
@@ -30,11 +30,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 2. Setup GitHub API Config
     const token = process.env.GITHUB_TOKEN;
-    const repo = process.env.GITHUB_REPO;
+    const repo = process.env.GITHUB_REPO || 'Manishraj019/AURORA_portfolio-';
     const branch = 'main';
 
-    if (!token || !repo) {
-      return res.status(500).json({ error: 'Server misconfiguration: GITHUB_TOKEN or GITHUB_REPO is not set.' });
+    if (!token) {
+      return res.status(500).json({ error: 'Server misconfiguration: GITHUB_TOKEN is not set in Vercel Environment Variables.' });
+    }
+    if (!repo) {
+      return res.status(500).json({ error: 'Server misconfiguration: GITHUB_REPO is not set.' });
     }
 
     const githubHeaders = {
