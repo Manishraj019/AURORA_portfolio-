@@ -6,6 +6,10 @@ export default function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   
+  // Local Settings
+  const [githubToken, setGithubToken] = useState(() => localStorage.getItem('GITHUB_TOKEN') || '');
+  const [showSettings, setShowSettings] = useState(false);
+  
   // Login State
   const [loginError, setLoginError] = useState('');
 
@@ -94,6 +98,7 @@ export default function AdminPanel() {
         action,
         id: editingClient?.id,
         password,
+        githubToken,
         name,
         website,
         review,
@@ -143,7 +148,7 @@ export default function AdminPanel() {
       const res = await fetch('/api/clients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', id, password }),
+        body: JSON.stringify({ action: 'delete', id, password, githubToken }),
       });
 
       const data = await res.json();
@@ -224,6 +229,12 @@ export default function AdminPanel() {
           </div>
           <div className="flex items-center gap-3">
             <button 
+              onClick={() => setShowSettings(!showSettings)}
+              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2.5 rounded-lg text-sm font-bold font-sans transition-all"
+            >
+              Settings
+            </button>
+            <button 
               onClick={() => {
                 if (view === 'form') {
                   setView('list');
@@ -245,6 +256,33 @@ export default function AdminPanel() {
             </button>
           </div>
         </div>
+
+        {showSettings && (
+          <div className="mb-8 glass-panel border border-violet-500/50 bg-violet-500/10 rounded-2xl p-6">
+            <h3 className="font-display text-xl font-bold mb-2 text-white">Admin Settings</h3>
+            <p className="text-slate-400 text-sm font-sans mb-4">
+              To bypass Vercel Environment Variables, you can save your GitHub Personal Access Token directly in your browser. This will securely authorize changes.
+            </p>
+            <div className="flex gap-4">
+              <input 
+                type="password"
+                value={githubToken}
+                onChange={(e) => {
+                  setGithubToken(e.target.value);
+                  localStorage.setItem('GITHUB_TOKEN', e.target.value);
+                }}
+                placeholder="ghp_..."
+                className="flex-1 bg-slate-900/80 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-violet-500 outline-none font-mono text-sm"
+              />
+              <button 
+                onClick={() => setShowSettings(false)}
+                className="bg-violet-600 hover:bg-violet-500 text-white font-bold px-6 py-3 rounded-lg transition-all"
+              >
+                Save Token
+              </button>
+            </div>
+          </div>
+        )}
 
         {view === 'list' ? (
           /* Dashboard List View */

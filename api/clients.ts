@@ -29,12 +29,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 2. Setup GitHub API Config
-    const token = process.env.GITHUB_TOKEN;
+    const token = req.body.githubToken || process.env.GITHUB_TOKEN;
     const repo = process.env.GITHUB_REPO || 'Manishraj019/AURORA_portfolio-';
     const branch = 'main';
 
     if (!token) {
-      return res.status(500).json({ error: 'Server misconfiguration: GITHUB_TOKEN is not set in Vercel Environment Variables.' });
+      return res.status(500).json({ error: 'GitHub Token is missing. Please provide it in the Admin Settings.' });
     }
     if (!repo) {
       return res.status(500).json({ error: 'Server misconfiguration: GITHUB_REPO is not set.' });
