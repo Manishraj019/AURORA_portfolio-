@@ -14,6 +14,8 @@ export default function AdminPanel() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const [password, setPassword] = useState('');
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -25,32 +27,53 @@ export default function AdminPanel() {
     }
   };
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve((reader.result as string).split(',')[1]); // get base64 part
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
     setErrorMessage('');
 
     try {
-      const data = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        data.append(key, value);
-      });
-      
-      if (imageFile) {
-        data.append('image', imageFile);
-      } else {
+      if (!imageFile) {
         setStatus('error');
         setErrorMessage('Image is required');
         return;
       }
 
+      if (!password) {
+        setStatus('error');
+        setErrorMessage('Admin password is required');
+        return;
+      }
+
+      const imageBase64 = await fileToBase64(imageFile);
+
+      const payload = {
+        ...formData,
+        password,
+        imageBase64,
+        imageName: imageFile.name,
+      };
+
       const response = await fetch('/api/clients', {
         method: 'POST',
-        body: data,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save client');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save client');
       }
 
       setStatus('success');
@@ -61,9 +84,9 @@ export default function AdminPanel() {
         rating: '5',
         category: '',
       });
+      setPassword('');
       setImageFile(null);
       
-      // Reset form
       const fileInput = document.getElementById('image-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
@@ -193,6 +216,18 @@ export default function AdminPanel() {
             className="w-full bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-violet-500 dark:focus:border-violet-500 transition-colors resize-none"
             placeholder="What did the client say?"
           ></textarea>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-rose-500 dark:text-rose-400">Admin Password *</label>
+          <input 
+            required
+            type="password" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full bg-white/50 dark:bg-black/20 border border-rose-200 dark:border-rose-900/50 rounded-lg px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 dark:focus:border-rose-500 transition-colors"
+            placeholder="Enter admin password to authorize live deployment"
+          />
         </div>
 
         {/* Status Messages */}
