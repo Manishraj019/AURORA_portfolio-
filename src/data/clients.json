@@ -1,14 +1,5 @@
 [
   {
-    "id": "example-client-1",
-    "name": "Gourmet Kitchen",
-    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-    "website": "https://example.com/gourmet",
-    "review": "\"Aurora transformed our digital presence. Our QR ordering system and new website look absolutely phenomenal. Highly recommended!\"",
-    "rating": 5,
-    "category": "Restaurant"
-  },
-  {
     "id": "example-client-2",
     "name": "Elevate Studios",
     "image": "https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=800&q=80",
