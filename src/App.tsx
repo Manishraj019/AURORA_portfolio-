@@ -17,6 +17,7 @@ import GooeyNav, { GooeyNavItem } from './components/GooeyNav';
 const CircularGallery = lazy(() => import('./components/CircularGallery'));
 import { BackdropPreset, BackgroundVideoOption } from './types';
 import HallOfFame from './components/HallOfFame';
+import AdminPanel from './components/AdminPanel';
 
 const DEFAULT_VIDEOS: BackgroundVideoOption[] = [
   {
@@ -500,10 +501,10 @@ export default function App() {
       const anchor = target.closest('a');
       if (anchor) {
         const href = anchor.getAttribute('href');
-        if (href === '/hall-of-fame') {
+        if (href === '/hall-of-fame' || href === '/admin') {
           e.preventDefault();
           window.history.pushState({}, '', href);
-          setCurrentPath('/hall-of-fame');
+          setCurrentPath(href);
           window.scrollTo(0, 0);
         } else if (href === '/') {
           e.preventDefault();
@@ -599,6 +600,8 @@ export default function App() {
         
         {currentPath === '/hall-of-fame' ? (
           <HallOfFame />
+        ) : currentPath === '/admin' ? (
+          <AdminPanel />
         ) : (
           <>
             {/* Left Cinematic Timeline Rail */}
