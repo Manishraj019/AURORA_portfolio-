@@ -16,6 +16,7 @@ import BillingDashboard from './components/billing/BillingDashboard';
 import GooeyNav, { GooeyNavItem } from './components/GooeyNav';
 const CircularGallery = lazy(() => import('./components/CircularGallery'));
 import { BackdropPreset, BackgroundVideoOption } from './types';
+import HallOfFame from './components/HallOfFame';
 
 const DEFAULT_VIDEOS: BackgroundVideoOption[] = [
   {
@@ -396,23 +397,24 @@ export default function App() {
 
   // Gooey Navigation Items configuration matching section IDs exactly
   const navItems: GooeyNavItem[] = [
-    { label: 'OS', href: '#vision' },
-    { label: 'Operations', href: '#principles' },
-    { label: 'Capabilities', href: '#ecosystem' },
-    { label: 'Growth', href: '#partner' }
+    { label: 'OS', href: '/#vision' },
+    { label: 'Operations', href: '/#principles' },
+    { label: 'Capabilities', href: '/#ecosystem' },
+    { label: 'Growth', href: '/#partner' },
+    { label: 'HALL OF FAME', href: '/hall-of-fame' }
   ];
 
-  const [activeHref, setActiveHref] = useState<string>('#vision');
+  const [activeHref, setActiveHref] = useState<string>('/#vision');
 
   useEffect(() => {
     if (scrollProgress < 0.22) {
-      setActiveHref('#vision');
+      setActiveHref('/#vision');
     } else if (scrollProgress < 0.48) {
-      setActiveHref('#principles');
+      setActiveHref('/#principles');
     } else if (scrollProgress < 0.78) {
-      setActiveHref('#ecosystem');
+      setActiveHref('/#ecosystem');
     } else {
-      setActiveHref('#partner');
+      setActiveHref('/#partner');
     }
   }, [scrollProgress]);
 
@@ -484,6 +486,49 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Client-side routing for Hall of Fame
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  useEffect(() => {
+    const handlePopState = () => setCurrentPath(window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    const handleLinkClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a');
+      if (anchor) {
+        const href = anchor.getAttribute('href');
+        if (href === '/hall-of-fame') {
+          e.preventDefault();
+          window.history.pushState({}, '', href);
+          setCurrentPath('/hall-of-fame');
+          window.scrollTo(0, 0);
+        } else if (href === '/') {
+          e.preventDefault();
+          window.history.pushState({}, '', href);
+          setCurrentPath('/');
+          window.scrollTo(0, 0);
+        } else if (href?.startsWith('/#')) {
+          if (window.location.pathname === '/hall-of-fame') {
+            e.preventDefault();
+            window.history.pushState({}, '', href);
+            setCurrentPath('/');
+            setTimeout(() => {
+              const element = document.getElementById(href.substring(2));
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+              }
+            }, 100);
+          }
+        }
+      }
+    };
+    document.addEventListener('click', handleLinkClick);
+    return () => document.removeEventListener('click', handleLinkClick);
+  }, []);
+
   if (currentHash === '#billing') {
     return (
       <Suspense fallback={<div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center text-white font-mono">LOADING SYSTEM...</div>}>
@@ -552,26 +597,30 @@ export default function App() {
       {/* Immersive Layout with Left and Right Side Rails */}
       <div className="flex relative max-w-7xl mx-auto w-full">
         
-        {/* Left Cinematic Timeline Rail */}
-        <aside className="w-24 border-r border-slate-200/50 dark:border-white/5 flex flex-col items-center py-12 shrink-0 sticky top-20 h-[calc(100vh-80px)] hidden lg:flex select-none">
-          <div className="text-[10px] uppercase tracking-[0.3em] text-slate-500 dark:text-white/30 rotate-180 font-bold" style={{ writingMode: 'vertical-rl' }}>
-            Transition Viewport
-          </div>
-          <div className="flex-1 w-px bg-slate-200 dark:bg-white/10 my-8 relative">
-            <div 
-              className="absolute w-1.5 h-12 bg-violet-600 dark:bg-white/80 left-1/2 -translate-x-1/2 rounded-full shadow-[0_0_15px_rgba(124,58,237,0.5)] dark:shadow-[0_0_15px_rgba(255,255,255,0.4)] transition-all duration-75"
-              style={{ top: `${scrollProgress * 80 + 5}%` }}
-            />
-          </div>
-          <span className="text-xs font-mono text-slate-500 dark:text-white/40">
-            {scrollProgress < 0.25 ? '01' : scrollProgress < 0.5 ? '02' : scrollProgress < 0.75 ? '03' : '04'} / 04
-          </span>
-        </aside>
+        {currentPath === '/hall-of-fame' ? (
+          <HallOfFame />
+        ) : (
+          <>
+            {/* Left Cinematic Timeline Rail */}
+            <aside className="w-24 border-r border-slate-200/50 dark:border-white/5 flex flex-col items-center py-12 shrink-0 sticky top-20 h-[calc(100vh-80px)] hidden lg:flex select-none">
+              <div className="text-[10px] uppercase tracking-[0.3em] text-slate-500 dark:text-white/30 rotate-180 font-bold" style={{ writingMode: 'vertical-rl' }}>
+                Transition Viewport
+              </div>
+              <div className="flex-1 w-px bg-slate-200 dark:bg-white/10 my-8 relative">
+                <div 
+                  className="absolute w-1.5 h-12 bg-violet-600 dark:bg-white/80 left-1/2 -translate-x-1/2 rounded-full shadow-[0_0_15px_rgba(124,58,237,0.5)] dark:shadow-[0_0_15px_rgba(255,255,255,0.4)] transition-all duration-75"
+                  style={{ top: `${scrollProgress * 80 + 5}%` }}
+                />
+              </div>
+              <span className="text-xs font-mono text-slate-500 dark:text-white/40">
+                {scrollProgress < 0.25 ? '01' : scrollProgress < 0.5 ? '02' : scrollProgress < 0.75 ? '03' : '04'} / 04
+              </span>
+            </aside>
 
-        {/* Central main content container */}
-        <main className="flex-1 relative z-10 px-6 md:px-12 flex flex-col gap-32 md:gap-48 pt-12 pb-32 overflow-hidden">
-        
-        {/* SECTION 1: HERO VIEW */}
+            {/* Central main content container */}
+            <main className="flex-1 relative z-10 px-6 md:px-12 flex flex-col gap-32 md:gap-48 pt-12 pb-32 overflow-hidden">
+            
+            {/* SECTION 1: HERO VIEW */}
         <section id="vision" className="min-h-[75vh] flex flex-col justify-start items-end text-right w-full pt-[40px] md:pt-[60px] relative">
           
           <motion.div
@@ -1131,6 +1180,8 @@ export default function App() {
             ΛURORΛ • 2026
           </div>
         </aside>
+          </>
+        )}
 
       </div>
 
