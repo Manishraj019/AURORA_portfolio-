@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS setup
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -17,7 +16,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { password, name, website, review, rating, category, imageBase64, imageName } = req.body;
+    const { action = 'add', id, password, name, website, review, rating, category, imageBase64, imageName } = req.body;
 
     // 1. Verify Password
     const adminPassword = process.env.ADMIN_PASSWORD;
@@ -31,8 +30,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 2. Setup GitHub API Config
     const token = process.env.GITHUB_TOKEN;
-    const repo = process.env.GITHUB_REPO; // e.g., "Manishraj019/AURORA_portfolio-"
-    const branch = 'main'; // default branch to push to
+    const repo = process.env.GITHUB_REPO;
+    const branch = 'main';
 
     if (!token || !repo) {
       return res.status(500).json({ error: 'Server misconfiguration: GITHUB_TOKEN or GITHUB_REPO is not set.' });
@@ -44,35 +43,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       'Content-Type': 'application/json',
     };
 
-    // 3. Upload Image to public/clients/
-    // Generate a unique name for the image
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const fileExtension = imageName.split('.').pop() || 'png';
-    const uniqueImageName = `client-${uniqueSuffix}.${fileExtension}`;
-    const imagePathInRepo = `public/clients/${uniqueImageName}`;
-    const imageUrl = `/clients/${uniqueImageName}`;
-
-    // Upload Image
-    const uploadImageRes = await fetch(`https://api.github.com/repos/${repo}/contents/${imagePathInRepo}`, {
-      method: 'PUT',
-      headers: githubHeaders,
-      body: JSON.stringify({
-        message: `Admin Panel: Add image for ${name}`,
-        content: imageBase64,
-        branch,
-      }),
-    });
-
-    if (!uploadImageRes.ok) {
-      const errorData = await uploadImageRes.json();
-      console.error('GitHub Image Upload Error:', errorData);
-      return res.status(500).json({ error: 'Failed to upload image to GitHub', details: errorData });
-    }
-
-    // 4. Update src/data/clients.json
+    // 3. Fetch existing clients.json
     const clientsFilePath = 'src/data/clients.json';
-    
-    // First, fetch the current clients.json to get its sha (required for updates) and content
     const getClientsRes = await fetch(`https://api.github.com/repos/${repo}/contents/${clientsFilePath}?ref=${branch}`, {
       headers: githubHeaders,
     });
@@ -83,33 +55,78 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const getClientsData = await getClientsRes.json();
     const currentClientsSha = getClientsData.sha;
-    
-    // GitHub contents are base64 encoded
     const decodedClientsJson = Buffer.from(getClientsData.content, 'base64').toString('utf-8');
-    const clientsList = JSON.parse(decodedClientsJson);
+    let clientsList: any[] = JSON.parse(decodedClientsJson);
 
-    // Append new client
-    const newClient = {
-      id: `client-${Date.now()}`,
-      name,
-      image: imageUrl,
-      website: website || '',
-      review,
-      rating: parseFloat(rating) || 5,
-      category: category || ''
-    };
+    let finalClient = null;
 
-    clientsList.push(newClient);
+    if (action === 'delete') {
+      if (!id) return res.status(400).json({ error: 'ID required for delete' });
+      clientsList = clientsList.filter((c: any) => c.id !== id);
+    } else if (action === 'add' || action === 'edit') {
+      let imageUrl = req.body.existingImage || '';
 
+      // Upload new image if provided
+      if (imageBase64 && imageName) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const fileExtension = imageName.split('.').pop() || 'png';
+        const uniqueImageName = `client-${uniqueSuffix}.${fileExtension}`;
+        const imagePathInRepo = `public/clients/${uniqueImageName}`;
+        imageUrl = `/clients/${uniqueImageName}`;
+
+        const uploadImageRes = await fetch(`https://api.github.com/repos/${repo}/contents/${imagePathInRepo}`, {
+          method: 'PUT',
+          headers: githubHeaders,
+          body: JSON.stringify({
+            message: `Admin Panel: Add image for ${name}`,
+            content: imageBase64,
+            branch,
+          }),
+        });
+
+        if (!uploadImageRes.ok) {
+          const errorData = await uploadImageRes.json();
+          return res.status(500).json({ error: 'Failed to upload image', details: errorData });
+        }
+      }
+
+      if (action === 'add') {
+        finalClient = {
+          id: `client-${Date.now()}`,
+          name,
+          image: imageUrl,
+          website: website || '',
+          review,
+          rating: parseFloat(rating) || 5,
+          category: category || ''
+        };
+        clientsList.push(finalClient);
+      } else if (action === 'edit') {
+        const index = clientsList.findIndex((c: any) => c.id === id);
+        if (index === -1) return res.status(404).json({ error: 'Client not found' });
+        
+        finalClient = {
+          ...clientsList[index],
+          name: name || clientsList[index].name,
+          image: imageUrl || clientsList[index].image,
+          website: website !== undefined ? website : clientsList[index].website,
+          review: review || clientsList[index].review,
+          rating: rating ? parseFloat(rating) : clientsList[index].rating,
+          category: category !== undefined ? category : clientsList[index].category,
+        };
+        clientsList[index] = finalClient;
+      }
+    }
+
+    // 4. Commit updated clients.json
     const updatedClientsJsonStr = JSON.stringify(clientsList, null, 2);
     const updatedClientsBase64 = Buffer.from(updatedClientsJsonStr).toString('base64');
 
-    // Commit updated clients.json
     const updateClientsRes = await fetch(`https://api.github.com/repos/${repo}/contents/${clientsFilePath}`, {
       method: 'PUT',
       headers: githubHeaders,
       body: JSON.stringify({
-        message: `Admin Panel: Add client ${name}`,
+        message: `Admin Panel: ${action} client ${name || id}`,
         content: updatedClientsBase64,
         sha: currentClientsSha,
         branch,
@@ -118,11 +135,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!updateClientsRes.ok) {
       const errorData = await updateClientsRes.json();
-      console.error('GitHub Clients Update Error:', errorData);
-      return res.status(500).json({ error: 'Failed to update clients.json in GitHub', details: errorData });
+      return res.status(500).json({ error: 'Failed to update clients.json', details: errorData });
     }
 
-    return res.status(200).json({ success: true, client: newClient, message: 'Successfully updated live site. Vercel is now deploying the changes.' });
+    return res.status(200).json({ 
+      success: true, 
+      client: finalClient, 
+      message: `Successfully ${action}ed client. Vercel is now deploying.` 
+    });
 
   } catch (error: any) {
     console.error('Server error:', error);
